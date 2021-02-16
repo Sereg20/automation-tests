@@ -8,6 +8,7 @@ var chromePath = require('chromedriver').path;
 let service = new chrome.ServiceBuilder(chromePath).build();
 chrome.setDefaultService(service);
 
+
 let driver = new Builder().withCapabilities(Capabilities.chrome()).build();
 
 
@@ -37,6 +38,16 @@ Then ("we rout to details page with specific info", async function() {
     await driver.sleep(2000);
     var taskName = await driver.wait(until.elementLocated(By.xpath("//*[@id='__section0-title']"))).getText();
     assert.equal(taskName, this.taskNameText);
+    driver.executeScript("window.history.go(-1)");
+});
+
+When ("we click on the second item with activated header checkbox", async function() {
+    var checkbox = await driver.wait(until.elementLocated(By.id("container-ui---tasksList--checkbox")));
+    await checkbox.click();
+});
+
+Then ("we rout to details page with opened dialog form with specific information", async function() {
+
 });
 
 // After(async function() {

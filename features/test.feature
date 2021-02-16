@@ -11,3 +11,7 @@ Scenario: Load the products list
 Scenario: Routing
     When we click on the first item
     Then we rout to details page with specific info
+
+Scenario: Routing with activated checkbox
+    When we click on the second item with activated header checkbox
+    Then we rout to details page with opened dialog form with specific information

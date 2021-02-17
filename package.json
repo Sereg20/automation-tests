@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/cucumber-js"
+    "test": "./node_modules/.bin/cucumber-js",
+    "debug": "node — inspect-brk=5858 ./node_modules/cucumber/bin/cucumber-js ./features/**/"
   },
   "author": "",
   "license": "ISC",

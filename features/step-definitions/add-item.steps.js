@@ -97,6 +97,6 @@ Then ("we should see opened dialog", async function() {
     await driver.findElement(By.id("container-ui---taskDetails--jobDetailsFragment"));
 });
 
-// After(async function() {
-//     await driver.close();
-// });
+After(async function() {
+    await driver.close();
+});

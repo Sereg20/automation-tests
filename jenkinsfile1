@@ -1,0 +1,12 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('My-JenkinsBuild-Steps') {
+            steps {
+               npm install
+               npm test
+            }
+        }
+    }
+}

@@ -4,8 +4,7 @@ pipeline {
     stages {
         stage('My-JenkinsBuild-Steps') {
             steps {
-               npm install
-               npm test
+               echo 'hello'
             }
         }
     }

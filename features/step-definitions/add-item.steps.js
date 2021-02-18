@@ -17,6 +17,7 @@ When("we request the products list", async function() {
 });
 
 Then ("we should receive", async function(dataTable) {
+    await driver.manage().setTimeouts( {implicit: 10000} )
     await driver.wait(until.elementsLocated(By.xpath("//tbody/tr")));
     await driver.sleep(1000);
 
@@ -30,6 +31,10 @@ Then ("we should receive", async function(dataTable) {
         assert.equal(taskName, expectations[i].name);
         assert.equal(description, expectations[i].description);
     }
+});
+
+Given ("first view", async function() {
+    await driver.findElement(By.xpath("//span[text()='Task planning']"));
 });
 
 When ("we click on the first item", async function() {
@@ -46,16 +51,22 @@ Then ("we rout to details page with specific info", async function() {
 
 When ("we click on the second item with activated header checkbox", async function() {
     const checkbox = await driver.wait(until.elementLocated(By.id("container-ui---tasksList--checkbox")));
-    await checkbox.click();
-    await driver.findElement(By.xpath("//tbody/tr[4]")).click();
+    const item = await driver.findElement(By.xpath("//tbody/tr[4]"));
+    checkbox.click();
+    item.click();
 });
 
 Then ("we rout to details page with opened dialog form with id {string}", async function(id) {
     await driver.sleep(2000);
     const idFromDialog = await driver.wait(until.elementLocated(By.id("__text54"))).getText();
+    const closeBtn = await driver.findElement(By.id("container-ui---taskDetails--closeDialogBtn"));
     assert.equal(id, idFromDialog);
-    await driver.findElement(By.id("container-ui---taskDetails--closeDialogBtn")).click();
+    closeBtn.click();
     await driver.navigate().back();
+});
+
+Given ("search field", async function() {
+    await driver.wait(until.elementLocated(By.id("container-ui---tasksList--smartFilterBar-filterItemControlA_-Name-inner")));
 });
 
 When ("we enter {string} in the input field", async function(query) {
@@ -73,6 +84,19 @@ Then ("we see items matching the request", async function() {
     }
 });
 
-After(async function() {
-    await driver.close();
+When ("we go to the second view", async function() {
+    const item = await driver.findElement(By.xpath("//tbody/tr[1]"));
+    item.click();
 });
+
+When ("reload thr page", async function() {
+    await driver.navigate().refresh();
+});
+
+Then ("we should see opened dialog", async function() {
+    await driver.findElement(By.id("container-ui---taskDetails--jobDetailsFragment"));
+});
+
+// After(async function() {
+//     await driver.close();
+// });

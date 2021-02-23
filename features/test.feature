@@ -24,5 +24,9 @@ Scenario: Search by name
 
 Scenario: Go to the second view and reload page 
     When we go to the second view
-    And reload thr page
+    And reload the page
     Then we should see opened dialog 
+
+Scenario: Data checking
+    When dialog with some data
+    Then data from dialog is equal to data from section

@@ -1,4 +1,4 @@
-const { Given, When, Then, After} = require('@cucumber/cucumber');
+const { Given, When, Then, AfterAll} = require('@cucumber/cucumber');
 const assert = require("assert");
 require('chromedriver');
 const {Builder, By, Key, until, Capabilities} = require("selenium-webdriver");
@@ -7,6 +7,9 @@ const chrome = require('selenium-webdriver/chrome');
 const chromePath = require('chromedriver').path;
 let service = new chrome.ServiceBuilder(chromePath).build();
 chrome.setDefaultService(service);
+
+var {setDefaultTimeout} = require('@cucumber/cucumber');
+setDefaultTimeout(60 * 1000);
 
 
 let driver = new Builder().withCapabilities(Capabilities.chrome()).build();
@@ -17,12 +20,11 @@ When("we request the products list", async function() {
 });
 
 Then ("we should receive", async function(dataTable) {
-    await driver.manage().setTimeouts( {implicit: 10000} )
     await driver.wait(until.elementsLocated(By.xpath("//tbody/tr")));
-    await driver.sleep(1000);
+    await driver.sleep(2000);
 
     const tasksElements = await driver.findElements(By.xpath("//tbody/tr"));
-    await driver.sleep(1000);
+    await driver.sleep(2000);
     const expectations = dataTable.hashes();
     for (let i = 0; i < expectations.length; i++) {
         const taskName = await tasksElements[i].findElement(By.xpath('descendant::span[1]')).getText();
@@ -76,8 +78,8 @@ When ("we enter {string} in the input field", async function(query) {
 });
 
 Then ("we see items matching the request", async function() {
-    await (await driver).sleep(2000);
-    const tasksElements = await driver.wait(until.elementsLocated(By.xpath("//tbody/tr")), 5000);
+    await driver.sleep(2000);
+    const tasksElements = await driver.wait(until.elementsLocated(By.xpath("//tbody/tr")));
     for (let i=0; i < tasksElements.length; i++) {
         const itemName = await driver.findElement(By.xpath(`//tbody/child::tr[${i+1}]/td/div/descendant::span[1]`)).getText();
         assert.equal(itemName, this.query);
@@ -89,14 +91,45 @@ When ("we go to the second view", async function() {
     item.click();
 });
 
-When ("reload thr page", async function() {
+When ("reload the page", async function() {
     await driver.navigate().refresh();
 });
 
 Then ("we should see opened dialog", async function() {
+    await driver.wait(until.elementLocated(By.id("container-ui---taskDetails--jobDetailsFragment")));
+});
+
+When("dialog with some data", async function() {
     await driver.findElement(By.id("container-ui---taskDetails--jobDetailsFragment"));
 });
 
-After(async function() {
+Then ("data from dialog is equal to data from section", async function() {
+    await driver.sleep(2000);
+    const labelFromDialogContainers = await driver.findElements(By.xpath("//div[@class='sapUiRespGridBreak sapUiRespGridSpanXL12 sapUiRespGridSpanL12 sapUiRespGridSpanM12 sapUiRespGridSpanS6 sapUiFormElementLbl']/descendant::bdi"));
+    const section = await driver.findElement(By.id("container-ui---taskDetails--simpleFormJobDetails"));
+    const valuesFromDialog = [];
+    const valuesFromSection = [];
+
+    for (let elem of labelFromDialogContainers) {
+        let text = await elem.getText();  
+
+        const valueFromDialog = await elem.findElement(By.xpath("ancestor::div[1]/following-sibling::div[1]/span")).getText();
+        await valuesFromDialog.push(valueFromDialog);
+
+        const labelFromSection = await section.findElement(By.xpath(`descendant::*[contains(text(), '${text}')]`));
+        if (text === "ID") {
+            var valueFromSection = await labelFromSection.findElement(By.xpath("ancestor::div[1]/following-sibling::div[1]//descendant::span/span")).getText();
+        } else {
+            var valueFromSection = await labelFromSection.findElement(By.xpath("ancestor::div[1]/following-sibling::div[1]/span")).getText();
+        }
+        
+        await valuesFromSection.push(valueFromSection);
+    };
+    for (let i = 0; i < valuesFromDialog.length; i++) {
+        assert.equal(valuesFromDialog[i], valuesFromSection[i]);
+    }
+});
+
+AfterAll(async function() {
     await driver.close();
 });
